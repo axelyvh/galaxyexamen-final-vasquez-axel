@@ -10,8 +10,6 @@ pipeline {
             }
             steps {
                 sh 'mvn package'
-                sh 'echo "Listar RUTA"'
-                sh 'ls -l target/'
             }
             post{
                 success {
@@ -46,7 +44,7 @@ pipeline {
                     }
                 }
             }
-            stage('Build Image') {
+            stage('Build Docker') {
                 steps {
                     copyArtifacts filter: 'target/labmaven-*.jar',
                                     fingerprintArtifacts: true,
@@ -59,7 +57,7 @@ pipeline {
                     sh 'docker-compose build'
                 }
             }
-            stage('Publish Image') {
+            stage('Push Docker') {
                 steps {
                     script {
                         sh 'docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}'
@@ -75,7 +73,6 @@ pipeline {
                         sh 'docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}'
                         sh 'docker rm galaxyLab -f'
                         sh 'docker run -d -p 8080:8080 --name galaxyLab ${DOCKER_CREDS_USR}/msmicroservice:$BUILD_NUMBER'
-                        //sh 'docker run -d -p 8080:8080 ${DOCKER_CREDS_USR}/msmicroservice:$BUILD_NUMBER'
                         sh 'docker logout'
                     }
                 }
